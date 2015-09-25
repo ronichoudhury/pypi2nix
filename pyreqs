@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+pkg="$1"
+version="$2"
+
+if [ -z "${pkg}" ]; then
+    echo "usage: pyreqs <package-name> [<version-string>]" >&2
+    exit 1
+fi
+
+if [ ! -z "${version}" ]; then
+    version="==${version}"
+fi
+
+here=$(cd $(dirname $0); pwd)
+
+tmpdir=$(mktemp -d)
+trap "rm -rf ${tmpdir}" EXIT
+
+pushd ${tmpdir}
+
+virtualenv venv
+
+./venv/bin/pip install semantic_version
+./venv/bin/pip install ${pkg}${version}
+
+./venv/bin/python "${here}/pyreqs.py" ${pkg}
